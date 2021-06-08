@@ -36,38 +36,43 @@ def GenerateTime():
 
 
 if __name__ == "__main__":
-    # Parameters, storage
+
+    QuFIFO = []
     QuEDF = []
     QuRM = []
-    SMOs = []
+
+    FIFOs = []
+    EDFs = []
     RMs = []
-    Tw = []
-    Tww =[]
-    Tn = []
-    t = [x for x in range(10000)]
-    faults = []
-    # Changes
-    faultschange = []
-    Tnchange = []
-    Twchange = []
-    FullWaitTime = []
 
     for lam in numpy.arange(1, 20, 0.5):
         E.ChangeLambda(lam)
         temp = GenerateQ()
-        QuEDF.append(temp)
+        QuFIFO.append(temp)
 
-    QuRM = QuEDF[:]
+    QuRM = QuFIFO[:]
+    QuEDF = QuFIFO[:]
 
-    for i in range(len(QuEDF)):
-        SMOs.append(SMO.EDF(QuEDF[i]))
+    for i in range(len(QuFIFO)):
+        FIFOs.append(SMO.FIFO(QuFIFO[i]))
         RMs.append(SMO.RM(QuRM[i]))
+        EDFs.append(SMO.EDF(QuEDF[i]))
 
     buf1 = []
     buf2 = []
     buf3 = []
 
-    def calculate(arr):
+    def calculate(arr, name):
+        Tw = []
+        Tww = []
+        Tn = []
+
+        faults = []
+        faultschange = []
+        Tnchange = []
+        Twchange = []
+        FullWaitTime = []
+
         for elem in arr:
             elem.work()
             buf1 = elem.GetFaults()
@@ -91,15 +96,19 @@ if __name__ == "__main__":
             Tww.append(FullWaitTime[elem])
 
         plt.plot(Tnchange, 'r')
+        plt.title(name)
         plt.show()
         plt.plot(faultschange, 'g')
+        plt.title(name)
         plt.show()
         plt.plot(Tww, 'k')
+        plt.title(name)
         plt.show()
 
         buf1.clear()
         buf2.clear()
         buf3.clear()
+
         Tw.clear()
         Tn.clear()
         faults.clear()
@@ -108,9 +117,9 @@ if __name__ == "__main__":
         Twchange.clear()
         Tww.clear()
 
-    calculate(SMOs)
-
-    calculate(RMs)
+    calculate(FIFOs, "FIFO")
+    calculate(EDFs, "EDF")
+    calculate(RMs, "RM")
 
 
 
